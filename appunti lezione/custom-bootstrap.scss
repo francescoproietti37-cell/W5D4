@@ -1,0 +1,85 @@
+// lo scopo di questo file è utilizzare i sorgenti ufficiali di BS per crearne
+// una versione "personalizzata": questa versione sarà uguale all'originale ma
+// magari avrà colori diversi, breakpoint diversi, spacings diversi etc. etc.
+
+// voglio creare questo file in modo da NON toccare i sorgenti e poterlo utilizzare
+// "on-top" qualsiasi versione recente di BS, anche quelle future.
+
+// da dove comincio?
+@import './scss/functions'; // <-- lo importiamo per far funzionare _variables.scss
+@import './scss/variables'; // <-- da qui vengono importate le mappe di BS
+
+// COLORI
+// modifichiamone uno esistente
+$new-primary: rgb(224, 46, 46);
+$new-secondary: #604242;
+$giorgio: blue;
+
+// bene, ho creato una nuova versione del colore "primary" e adesso dovrei andare
+// a "fondere" questo colore nella mappa che si chiama "theme-colors", che nelle logiche
+// interne di BS viene ciclata n volte per creare tutte le varianti degli alert, dei bg,
+// dei bottoni etc. etc.
+$new-theme-colors: (
+  'primary': $new-primary,
+  'secondary': $new-secondary,
+  'giorgio': $giorgio,
+);
+// ora fondo $new-theme-colors con il $theme-colors ufficiale dentro il partial _variables.scss
+$theme-colors: map-merge($theme-colors, $new-theme-colors);
+// ora $theme-colors è stata riassegnata ad una nuova mappa dove il colore "primary"
+// è stato sostituito con il mio nuovo valore ($new-primary)
+
+// ora i colori sono stati correttamente sovrascritti
+// BS adesso dovrà utilizzarli per generare i bottoni, alert, bg etc. etc.
+
+// POSITION-VALUES
+$new-position-values: (
+  25: 25%,
+  75: 75%,
+  10: 10px,
+);
+
+$position-values: map-merge($position-values, $new-position-values);
+
+// SPACINGS
+$new-spacers: (
+  6: $spacer * 4.5,
+  7: $spacer * 6,
+);
+
+$spacers: map-merge($spacers, $new-spacers);
+
+// CLASSI EX NOVO
+.giulia {
+  display: flex;
+}
+
+// CLASSI PER FONT-SIZE RESPONSIVE
+@import './scss/maps';
+@import './scss/mixins';
+@import './scss/utilities';
+
+$utilities: map-merge(
+  $utilities,
+  (
+    'font-size':
+      map-merge(
+        map-get($utilities, 'font-size'),
+        (
+          responsive: true,
+        )
+      ),
+  )
+);
+
+// ora è arrivato il momento di importare il resto dei partials di bootstrap
+// nell'ordine corretto in modo che il resto dei cicli, mixin etc. possa sfruttare
+// questa $theme-colors per generare tutto il contenuto CSS
+@import './scss/bootstrap.scss';
+
+// domanda: ma come mai trascinandoci di nuovo dentro alla fine TUTTI i partial
+// $theme-colors NON riprende il valore originale del partial _variables?
+// perchè TUTTE le variabili di BS hanno alla fine della loro dichiarazione un
+// flag !default, che significa: "ora (ri)dichiaro questa variabile a meno che
+// non sia già stata dichiarata prima". Questo fa in modo che la nostra "$theme-colors",
+// dichiarata in questo foglio, NON riprenda il valore originale impostato da BS.
